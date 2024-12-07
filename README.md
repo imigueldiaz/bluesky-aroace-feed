@@ -1,7 +1,7 @@
 # Bluesky Aroace Feed 🌈
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-![Python](https://img.shields.io/badge/python-3.9+-blue.svg)
+![Node.js](https://img.shields.io/badge/node.js-%3E=22.0.0-green.svg)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/imigu/bluesky-aroace-feed/graphs/commit-activity)
 
 A specialized feed generator for the Bluesky social network that curates content related to the aromantic and asexual (aroace) community. This project aims to create a safe and inclusive space for aroace individuals to connect and share their experiences.
@@ -12,12 +12,13 @@ A specialized feed generator for the Bluesky social network that curates content
 - Custom filtering and content moderation
 - Real-time feed updates
 - Community-driven content discovery
+- Multilingual support
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Python 3.9 or higher
+- Node.js 22.0.0 or higher
 - A Bluesky account
 - API credentials for Bluesky
 
@@ -31,7 +32,7 @@ cd bluesky-aroace-feed
 
 2. Install dependencies
 ```bash
-pip install -r requirements.txt
+npm install
 ```
 
 3. Configure your environment variables
@@ -46,6 +47,32 @@ The feed can be customized through the configuration file. You can modify:
 - Content filtering parameters
 - Update frequency
 - Feed visibility settings
+- Language preferences
+- Moderation thresholds
+
+## 🚀 Running the Feed
+
+Start the feed generator:
+```bash
+npm start
+```
+
+For development with auto-reload:
+```bash
+npm run dev
+```
+
+## 🧪 Testing
+
+Run the test suite:
+```bash
+npm test
+```
+
+For test coverage:
+```bash
+npm run test:coverage
+```
 
 ## 🤝 Contributing
 
