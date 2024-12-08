@@ -36,6 +36,11 @@ export function analyze(text) {
   // First check if we're in a gaming context when "ace" is present
   const hasAce = lowerText.includes('ace');
   const isInGamingContext = hasAce && hasGamingContext(text, language);
+  const hasIdentityContext =
+    lowerText.includes('being ace') ||
+    lowerText.includes('am ace') ||
+    lowerText.includes('identify as ace') ||
+    lowerText.includes('aroace');
 
   // Process each keyword
   for (const keyword of relevantKeywords) {
@@ -43,10 +48,10 @@ export function analyze(text) {
     const matches = (lowerText.match(pattern) || []).length;
 
     if (matches > 0) {
-      // For "ace", only count if NOT in a gaming context
+      // For "ace", handle mixed contexts
       if (keyword.toLowerCase() === 'ace') {
-        if (isInGamingContext) {
-          continue; // Skip this word if in gaming context
+        if (isInGamingContext && !hasIdentityContext) {
+          continue; // Skip only if in gaming context without identity context
         }
       }
       relevanceScore += matches;

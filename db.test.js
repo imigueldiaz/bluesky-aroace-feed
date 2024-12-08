@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest';
+import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { FeedDatabase } from './db.js';
 import { mockFs, mockDb } from './vitest.setup.js';
 
@@ -24,12 +24,12 @@ describe('FeedDatabase', () => {
   });
 
   describe('initialization', () => {
-    it('should create database file if it does not exist', () => {
+    test('should create database file if it does not exist', () => {
       expect(db).toBeDefined();
       expect(mockDb.exec).toHaveBeenCalled();
     });
 
-    it('should not create file if it exists', () => {
+    test('should not create file if it exists', () => {
       mockFs.existsSync.mockReturnValue(true);
       const existingDb = new FeedDatabase(':memory:');
       expect(existingDb).toBeDefined();
@@ -38,7 +38,7 @@ describe('FeedDatabase', () => {
   });
 
   describe('post operations', () => {
-    it('should add a post', () => {
+    test('should add a post', () => {
       const post = {
         uri: 'test-uri',
         cid: 'test-cid',
@@ -52,7 +52,7 @@ describe('FeedDatabase', () => {
       expect(mockDb.prepare).toHaveBeenCalled();
     });
 
-    it('should get posts', () => {
+    test('should get posts', () => {
       const posts = db.getPosts();
       const preparedStatement = mockDb.prepare.mock.results[0].value;
 

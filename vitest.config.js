@@ -16,7 +16,7 @@ export default defineConfig({
     },
     environment: 'node',
     globals: true,
-    include: ['**/*.test.js'],
+    include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     setupFiles: ['./vitest.setup.js'],
     deps: {
       interopDefault: true,

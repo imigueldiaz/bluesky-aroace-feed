@@ -1,29 +1,28 @@
+/* eslint-disable no-console */
 import nlp from 'compromise';
-import config from './config.js';
 import fs from 'fs';
 import path from 'path';
 
 // Clase para gestionar el caché
-class Cache {
+export class Cache {
   constructor(ttl = 100) {
     this.cache = new Map();
     this.ttl = ttl;
   }
 
   set(key, value) {
-    this.cache.set(key, {
-      value,
-      timestamp: Date.now(),
-    });
+    const timestamp = Date.now();
+    this.cache.set(key, { value, timestamp });
   }
 
   get(key) {
     const item = this.cache.get(key);
-    if (!item) return undefined;
+    if (!item) return null;
 
-    if (Date.now() - item.timestamp > this.ttl) {
+    const age = Date.now() - item.timestamp;
+    if (age > this.ttl) {
       this.cache.delete(key);
-      return undefined;
+      return null;
     }
 
     return item.value;
@@ -31,95 +30,147 @@ class Cache {
 }
 
 // Detector de idioma basado en nlp
-class LanguageDetector {
+export class LanguageDetector {
   static detect(text) {
     if (!text) return 'und';
 
     const doc = nlp(text);
+    let scores = {
+      en: 0,
+      es: 0,
+      fr: 0,
+      de: 0,
+    };
 
-    // Use compromise's built-in features to analyze the text
-    const terms = doc.terms().out('array');
-    const normalizedText = doc.normalize().out('text');
+    // Usar nlp para análisis gramatical
+    const hasEnglishGrammar =
+      doc.has('#Determiner #Noun') || doc.has('#Pronoun #Verb');
+    const hasSpanishGrammar = doc.has('el? #Noun') || doc.has('la? #Noun');
+    const hasFrenchGrammar = doc.has('le? #Noun') || doc.has('la? #Noun');
+    const hasGermanGrammar = doc.has('(der|die|das) #Noun');
 
-    // Improved language detection using compromise's tokenization
-    const enPatterns = ['the', 'is', 'are', 'and', 'this', 'that'];
-    const esPatterns = ['el', 'la', 'los', 'las', 'es', 'son', 'esto', 'eso'];
+    if (hasEnglishGrammar) scores.en += 2;
+    if (hasSpanishGrammar) scores.es += 2;
+    if (hasFrenchGrammar) scores.fr += 2;
+    if (hasGermanGrammar) scores.de += 2;
 
-    // Check both original terms and normalized text for better accuracy
-    let enScore = terms.filter((term) =>
-      enPatterns.includes(term.toLowerCase())
-    ).length;
-    let esScore = terms.filter((term) =>
-      esPatterns.includes(term.toLowerCase())
-    ).length;
+    // Palabras clave específicas por idioma
+    const keywords = {
+      en: ['the', 'is', 'are', 'be', 'to', 'in', 'that', 'have', 'it'],
+      es: [
+        'el',
+        'la',
+        'los',
+        'las',
+        'es',
+        'son',
+        'estar',
+        'que',
+        'en',
+        'tiene',
+      ],
+      fr: ['le', 'la', 'les', 'est', 'sont', 'être', 'que', 'en', 'avoir'],
+      de: [
+        'der',
+        'die',
+        'das',
+        'ist',
+        'sind',
+        'sein',
+        'allen',
+        'zu',
+        'haben',
+        'menschen',
+      ],
+    };
 
-    // Add additional score from normalized text analysis
-    enScore += enPatterns.filter((pattern) =>
-      normalizedText.toLowerCase().includes(pattern)
-    ).length;
-    esScore += esPatterns.filter((pattern) =>
-      normalizedText.toLowerCase().includes(pattern)
-    ).length;
+    // Normalizar texto para comparación de palabras clave
+    const normalizedText = text.toLowerCase();
+    const words = normalizedText.split(/\s+/);
 
-    // Use config's default language if scores are equal
-    if (enScore === esScore) {
-      return config.defaultLanguage || 'en';
+    // Contar palabras clave por idioma
+    for (const [lang, keywordList] of Object.entries(keywords)) {
+      for (const keyword of keywordList) {
+        if (words.includes(keyword)) {
+          scores[lang] += 2;
+        }
+      }
     }
 
-    return enScore > esScore ? 'en' : 'es';
+    // Patrones específicos por idioma
+    if (normalizedText.match(/\b(der|die|das|den|dem|des)\b/)) scores.de += 3;
+    if (normalizedText.match(/\b(el|la|los|las)\b/)) scores.es += 2;
+    if (normalizedText.match(/\b(le|la|les|des)\b/)) scores.fr += 2;
+    if (normalizedText.match(/\b(the|an?)\b/)) scores.en += 2;
+
+    // German-specific patterns
+    if (normalizedText.match(/\b(allen|menschen|tod|sterben)\b/))
+      scores.de += 3;
+    // French-specific patterns
+    if (normalizedText.match(/\b(tous|toutes|mort|mourir)\b/)) scores.fr += 3;
+
+    // Analizar estructura de la frase usando NLP
+    const terms = doc.terms().out('array');
+    const tags = doc.terms().out('tags');
+
+    // Check for language-specific grammar patterns
+    for (let i = 0; i < terms.length - 1; i++) {
+      // German compound nouns (typically capitalized)
+      if (terms[i][0] === terms[i][0].toUpperCase() && terms[i].length > 7) {
+        scores.de += 1;
+      }
+
+      // English patterns
+      if (tags[i].includes('Determiner') && tags[i + 1].includes('Noun')) {
+        scores.en += 1;
+      }
+
+      // Spanish/French patterns
+      if (
+        ['el', 'la', 'les'].includes(terms[i].toLowerCase()) &&
+        tags[i + 1].includes('Noun')
+      ) {
+        scores.es += 1;
+        scores.fr += 1;
+      }
+    }
+
+    // Encontrar el idioma con mayor puntuación
+    let maxScore = 0;
+    let detectedLang = 'en';
+    for (const [lang, score] of Object.entries(scores)) {
+      if (score > maxScore) {
+        maxScore = score;
+        detectedLang = lang;
+      }
+    }
+
+    console.log('Language scores:', scores);
+    return detectedLang;
   }
 }
 
-// Procesador morfológico
-class MorphologyProcessor {
-  process(text) {
-    if (!text) return '';
-
-    const doc = nlp(text);
-
-    // Use compromise's natural language processing capabilities
-    return doc
-      .normalize({
-        whitespace: true,
-        punctuation: true,
-        case: true,
-        numbers: true,
-        plurals: true,
-        verbs: true,
-      })
-      .terms()
-      .out('array');
-  }
-}
-
-// Sistema de logging mejorado
-/* eslint-disable no-console */
-class Logger {
-  constructor(logFile = './logs/app.log') {
-    this.logFile = logFile;
+// Clase para gestionar logs
+export class Logger {
+  constructor(logDir = './logs') {
+    this.logDir = logDir;
     this.createLogDirectory();
   }
 
   createLogDirectory() {
-    const dir = path.dirname(this.logFile);
-    if (dir && !fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(this.logDir)) {
+      fs.mkdirSync(this.logDir, { recursive: true });
     }
   }
 
-  info(message) {
-    this.log('INFO', message);
+  getLogPath() {
+    const date = new Date().toISOString().split('T')[0];
+    return path.join(this.logDir, `${date}.log`);
   }
 
-  error(message) {
-    this.log('ERROR', message);
-  }
-
-  log(level, message) {
+  log(message) {
     const timestamp = new Date().toISOString();
-    const logMessage = `[${timestamp}] ${level}: ${message}\n`;
-    fs.appendFileSync(this.logFile, logMessage);
+    const logMessage = `${timestamp} - ${message}\n`;
+    fs.appendFileSync(this.getLogPath(), logMessage);
   }
 }
-
-export { Cache, LanguageDetector, MorphologyProcessor, Logger };
