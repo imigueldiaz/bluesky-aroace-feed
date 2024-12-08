@@ -1,0 +1,37 @@
+codecov:
+  require_ci_to_pass: no # No requerirá que pase CI
+  notify:
+    wait_for_ci: false # No esperará a CI
+
+coverage:
+  precision: 2
+  round: down
+  range: '70...100'
+  status:
+    project:
+      default:
+        informational: true # Solo informativo para el proyecto completo
+        target: auto
+        threshold: 10%
+    patch:
+      default:
+        informational: true # Solo informativo para los cambios
+        target: auto
+        threshold: 10%
+    changes: no # No reportar cambios en la cobertura
+
+parsers:
+  gcov:
+    branch_detection:
+      conditional: yes
+      loop: yes
+      method: no
+      macro: no
+
+comment:
+  layout: 'files' # Mostrar solo archivos afectados
+  behavior: default
+  require_changes: false # Comentar incluso sin cambios
+  require_base: false # No requiere rama base
+  require_head: true # Requiere rama head
+  show_carryforward_flags: true

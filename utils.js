@@ -1,94 +1,125 @@
 import nlp from 'compromise';
 import config from './config.js';
-
-// Por ahora usaremos solo el soporte básico de compromise
-// TODO: Añadir soporte multilingüe más adelante
+import fs from 'fs';
+import path from 'path';
 
 // Clase para gestionar el caché
-export class Cache {
-  constructor(maxSize) {
-    this.maxSize = maxSize;
+class Cache {
+  constructor(ttl = 100) {
     this.cache = new Map();
-    this.hits = 0;
-    this.misses = 0;
+    this.ttl = ttl;
   }
 
   set(key, value) {
-    if (this.cache.size >= this.maxSize) {
-      const oldestKey = this.cache.keys().next().value;
-      this.cache.delete(oldestKey);
-    }
     this.cache.set(key, {
       value,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     });
   }
 
   get(key) {
     const item = this.cache.get(key);
-    if (!item) {
-      this.misses++;
-      return null;
-    }
-    this.hits++;
-    return item.value;
-  }
+    if (!item) return undefined;
 
-  size() {
-    return this.cache.size;
+    if (Date.now() - item.timestamp > this.ttl) {
+      this.cache.delete(key);
+      return undefined;
+    }
+
+    return item.value;
   }
 }
 
 // Detector de idioma basado en nlp
-export class LanguageDetector {
+class LanguageDetector {
   static detect(text) {
-    try {
-      const doc = nlp(text);
-      return doc.language();
-    } catch (error) {
-      return config.languages.default;
+    if (!text) return 'und';
+
+    const doc = nlp(text);
+
+    // Use compromise's built-in features to analyze the text
+    const terms = doc.terms().out('array');
+    const normalizedText = doc.normalize().out('text');
+
+    // Improved language detection using compromise's tokenization
+    const enPatterns = ['the', 'is', 'are', 'and', 'this', 'that'];
+    const esPatterns = ['el', 'la', 'los', 'las', 'es', 'son', 'esto', 'eso'];
+
+    // Check both original terms and normalized text for better accuracy
+    let enScore = terms.filter((term) =>
+      enPatterns.includes(term.toLowerCase())
+    ).length;
+    let esScore = terms.filter((term) =>
+      esPatterns.includes(term.toLowerCase())
+    ).length;
+
+    // Add additional score from normalized text analysis
+    enScore += enPatterns.filter((pattern) =>
+      normalizedText.toLowerCase().includes(pattern)
+    ).length;
+    esScore += esPatterns.filter((pattern) =>
+      normalizedText.toLowerCase().includes(pattern)
+    ).length;
+
+    // Use config's default language if scores are equal
+    if (enScore === esScore) {
+      return config.defaultLanguage || 'en';
     }
+
+    return enScore > esScore ? 'en' : 'es';
   }
 }
 
 // Procesador morfológico
-export class MorphologyProcessor {
-  process(text, language) {
+class MorphologyProcessor {
+  process(text) {
+    if (!text) return '';
+
     const doc = nlp(text);
-    return {
-      tokens: doc.terms().out('array'),
-      tags: doc.terms().out('tags'),
-      normalized: doc.normalize().out('text')
-    };
+
+    // Use compromise's natural language processing capabilities
+    return doc
+      .normalize({
+        whitespace: true,
+        punctuation: true,
+        case: true,
+        numbers: true,
+        plurals: true,
+        verbs: true,
+      })
+      .terms()
+      .out('array');
   }
 }
 
 // Sistema de logging mejorado
-export class Logger {
-  static info(message, data = {}) {
-    console.log(JSON.stringify({ level: 'info', message, ...data, timestamp: new Date().toISOString() }));
+/* eslint-disable no-console */
+class Logger {
+  constructor(logFile = './logs/app.log') {
+    this.logFile = logFile;
+    this.createLogDirectory();
   }
 
-  static error(message, error = {}) {
-    console.error(JSON.stringify({
-      level: 'error',
-      message,
-      error: error.message || error,
-      stack: error.stack,
-      timestamp: new Date().toISOString()
-    }));
-  }
-
-  static debug(message, data = {}) {
-    if (process.env.NODE_ENV !== 'production') {
-      console.debug(JSON.stringify({ level: 'debug', message, ...data, timestamp: new Date().toISOString() }));
+  createLogDirectory() {
+    const dir = path.dirname(this.logFile);
+    if (dir && !fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
     }
+  }
+
+  info(message) {
+    this.log('INFO', message);
+  }
+
+  error(message) {
+    this.log('ERROR', message);
+  }
+
+  log(level, message) {
+    const timestamp = new Date().toISOString();
+    const logMessage = `[${timestamp}] ${level}: ${message}\n`;
+    fs.appendFileSync(this.logFile, logMessage);
   }
 }
 
-export default {
-  Cache,
-  LanguageDetector,
-  MorphologyProcessor,
-  Logger
-};
+export { Cache, LanguageDetector, MorphologyProcessor, Logger };

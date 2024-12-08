@@ -2,15 +2,24 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    environment: 'node',
-    include: ['**/*.test.js'],
     coverage: {
-      reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/**',
-        'coverage/**',
-        '**/*.config.js'
-      ]
-    }
-  }
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
+      reportsDirectory: './coverage',
+      exclude: ['node_modules/**', 'dist/**', '**/*.test.js', '**/*.config.js'],
+      all: true,
+      clean: true,
+      thresholds: {
+        autoUpdate: true,
+        perFile: true,
+      },
+    },
+    environment: 'node',
+    globals: true,
+    include: ['**/*.test.js'],
+    setupFiles: ['./vitest.setup.js'],
+    deps: {
+      interopDefault: true,
+    },
+  },
 });

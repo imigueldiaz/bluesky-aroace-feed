@@ -1,32 +1,62 @@
 import keywords from './keywords';
 import { LanguageDetector } from './utils';
+import { hasGamingContext } from './filter-patterns.js';
 
-export const analyze = (text) => {
+const SPECIAL_CHARS_PATTERN = /[.*+?^${}()|[\]\\]/g;
+const keywordPatternsCache = new Map();
+
+// Create and cache a regex pattern for a keyword
+const getKeywordPattern = (keyword) => {
+  const lowercaseKeyword = keyword.toLowerCase();
+  let pattern = keywordPatternsCache.get(lowercaseKeyword);
+
+  if (!pattern) {
+    const escapedKeyword = lowercaseKeyword.replace(
+      SPECIAL_CHARS_PATTERN,
+      '\\$&'
+    );
+    // Only match whole words, not parts of other words
+    pattern = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
+    keywordPatternsCache.set(lowercaseKeyword, pattern);
+  }
+
+  return pattern;
+};
+
+export function analyze(text) {
+  if (!text) return false;
+
   let matchedKeywords = [];
   let relevanceScore = 0;
 
   const language = LanguageDetector.detect(text);
   const relevantKeywords = keywords[language] || keywords.en;
+  const lowerText = text.toLowerCase();
 
-  relevantKeywords.forEach((keyword) => {
-    // Escape special characters and create pattern
-    const escapedKeyword = keyword.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const pattern = new RegExp(`\\b${escapedKeyword}\\b`, 'i');
+  // First check if we're in a gaming context when "ace" is present
+  const hasAce = lowerText.includes('ace');
+  const isInGamingContext = hasAce && hasGamingContext(text, language);
 
-    // Score based on keyword matches with word boundaries
-    const lowerText = text.toLowerCase();
+  // Process each keyword
+  for (const keyword of relevantKeywords) {
+    const pattern = getKeywordPattern(keyword);
     const matches = (lowerText.match(pattern) || []).length;
-    relevanceScore += matches;
 
-    // Get matched keywords for debugging
     if (matches > 0) {
+      // For "ace", only count if NOT in a gaming context
+      if (keyword.toLowerCase() === 'ace') {
+        if (isInGamingContext) {
+          continue; // Skip this word if in gaming context
+        }
+      }
+      relevanceScore += matches;
       matchedKeywords.push(keyword);
     }
-  });
+  }
 
   return {
     isRelevant: relevanceScore > 0,
     matchedKeywords,
     relevanceScore,
   };
-};
+}

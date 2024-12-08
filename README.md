@@ -25,17 +25,20 @@ A specialized feed generator for the Bluesky social network that curates content
 ### Installation
 
 1. Clone the repository
+
 ```bash
 git clone https://github.com/imigu/bluesky-aroace-feed.git
 cd bluesky-aroace-feed
 ```
 
 2. Install dependencies
+
 ```bash
 npm install
 ```
 
 3. Configure your environment variables
+
 ```bash
 cp .env.example .env
 # Edit .env with your Bluesky credentials
@@ -44,6 +47,7 @@ cp .env.example .env
 ## 🔧 Configuration
 
 The feed can be customized through the configuration file. You can modify:
+
 - Content filtering parameters
 - Update frequency
 - Feed visibility settings
@@ -53,11 +57,13 @@ The feed can be customized through the configuration file. You can modify:
 ## 🚀 Running the Feed
 
 Start the feed generator:
+
 ```bash
 npm start
 ```
 
 For development with auto-reload:
+
 ```bash
 npm run dev
 ```
@@ -65,11 +71,13 @@ npm run dev
 ## 🧪 Testing
 
 Run the test suite:
+
 ```bash
 npm test
 ```
 
 For test coverage:
+
 ```bash
 npm run test:coverage
 ```

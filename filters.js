@@ -1,46 +1,44 @@
 import nlp from 'compromise';
+import { LanguageDetector } from './utils.js';
+import { spamPatterns, getAllSensitiveTerms } from './filter-patterns.js';
 
 export const aceFilters = {
-  // Filter out potentially inappropriate or off-topic content
+  // Filtrar contenido inapropiado o fuera de tema
   isAppropriate: (text) => {
+    if (!text) return true;
+
     const doc = nlp(text);
+    const language = LanguageDetector.detect(text);
+    const lowerText = text.toLowerCase();
 
-    // Check for explicit content markers
-    const hasExplicitContent = doc.match('#Explicit').found;
-    if (hasExplicitContent) return false;
+    // Verificar patrones de spam según el idioma
+    const spamPattern = spamPatterns[language] || spamPatterns.en;
+    const spamCount = lowerText.match(spamPattern)?.length ?? 0;
+    if (spamCount > 2) return false;
 
-    // Check for spam patterns
-    const isSpam =
-      doc.match('#Spam').found || text.match(/\b(buy|sell|discount|offer)\b/gi)?.length > 2;
-    if (isSpam) return false;
+    // Verificar contenido sensible según el idioma
+    const sensitiveTerms = getAllSensitiveTerms(language);
+    const hasSensitiveContent = sensitiveTerms.some((term) => {
+      // Buscar términos exactos o como parte de palabras más grandes
+      const pattern = new RegExp(`\\b${term}\\b|${term}`, 'i');
+      return pattern.test(lowerText);
+    });
+
+    if (hasSensitiveContent) return false;
+
+    // Verificar el contexto general del texto
+    const hasNegativeContext = doc.match('(hate|death|kill|die|suicide)').found;
+    if (hasNegativeContext) return false;
 
     return true;
   },
 };
 
-export const sentimentConfig = {
-  positive: [
-    'pride',
-    'happy',
-    'valid',
-    'acceptance',
-    'community',
-    'support',
-    'love',
-    'understanding',
-    'authentic',
-    'belonging',
-  ],
-  negative: [
-    'hate',
-    'invalid',
-    'broken',
-    'wrong',
-    'sick',
-    'unnatural',
-    'confused',
-    'phase',
-    'lonely',
-    'reject',
-  ],
+export const filterRelevantPosts = (posts) => {
+  if (!Array.isArray(posts)) return [];
+
+  return posts.filter((post) => {
+    if (!post || !post.text) return false;
+    return aceFilters.isAppropriate(post.text);
+  });
 };

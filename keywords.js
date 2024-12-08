@@ -2,64 +2,157 @@
 export const keywords = {
   en: [
     // Asexual terms
-    'asexual', 'ace', 'acespec', 'asexuality', 'demisexual',
-    'graysexual', 'greysexual', 'aspec', 'acespectrum',
+    'asexual',
+    'ace',
+    'acespec',
+    'asexuality',
+    'demisexual',
+    'graysexual',
+    'greysexual',
+    'aspec',
+    'acespectrum',
     // Aromantic terms
-    'aromantic', 'aro', 'arro', 'arospec', 'aromanticism', 'demiromantic',
-    'grayromantic', 'greyromantic', 'arospectrum',
+    'aromantic',
+    'aro',
+    'arro',
+    'arospec',
+    'aromanticism',
+    'demiromantic',
+    'grayromantic',
+    'greyromantic',
+    'arospectrum',
     // Combined terms
-    'aroace', 'acearo', 'aaro', 'aace',
+    'aroace',
+    'acearo',
+    'aaro',
+    'aace',
     // Community terms
-    'lgbtqia', 'queer', 'pride', 'identity', 'orientation'
+    'lgbtqia',
+    'queer',
+    'pride',
+    'identity',
+    'orientation',
   ],
-  
+
   es: [
     // Términos asexuales
-    'asexual', 'ace', 'acespec', 'asexualidad', 'demisexual',
-    'grisexual', 'graysexual', 'greysexual', 'espectro asexual', 'aspec',
-    'espectro ace', 'acespectro',
+    'asexual',
+    'ace',
+    'acespec',
+    'asexualidad',
+    'demisexual',
+    'grisexual',
+    'graysexual',
+    'greysexual',
+    'espectro asexual',
+    'aspec',
+    'espectro ace',
+    'acespectro',
     // Términos aromáticos
-    'aromático', 'aromántica', 'aro', 'arro', 'arospec', 'arromántico',
-    'arromántique', 'demiromático', 'demiromática', 'griromático',
-    'griromática', 'grisromático', 'grisromántique', 'espectro aromático',
-    'espectro aro', 'arospectro',
+    'aromático',
+    'aromántica',
+    'aro',
+    'arro',
+    'arospec',
+    'arromántico',
+    'arromántique',
+    'demiromático',
+    'demiromática',
+    'griromático',
+    'griromática',
+    'grisromático',
+    'grisromántique',
+    'espectro aromático',
+    'espectro aro',
+    'arospectro',
     // Términos combinados
-    'aroace', 'acearo', 'aaro', 'aace', 'arro ace', 'ace arro',
+    'aroace',
+    'acearo',
+    'aaro',
+    'aace',
+    'arro ace',
+    'ace arro',
     // Términos comunitarios
-    'lgbtqia', 'queer', 'orgullo', 'identidad', 'orientación',
+    'lgbtqia',
+    'queer',
+    'orgullo',
+    'identidad',
+    'orientación',
     // Términos coloquiales
-    'asexualidad', 'arrománticx', 'aromáticx',
+    'asexualidad',
+    'arrománticx',
+    'aromáticx',
     // Hashtags comunes
-    'comunidadace', 'comunidadaro', 'comunidadaroace',
-    'orgulloace', 'orgulloaro', 'orgulloaroace'
+    'comunidadace',
+    'comunidadaro',
+    'comunidadaroace',
+    'orgulloace',
+    'orgulloaro',
+    'orgulloaroace',
   ],
-  
+
   fr: [
     // Termes asexuels
-    'asexuel', 'asexuelle', 'ace', 'acespec', 'asexualité',
-    'demisexuel', 'demisexuelle', 'grisexuel', 'grisexuelle',
+    'asexuel',
+    'asexuelle',
+    'ace',
+    'acespec',
+    'asexualité',
+    'demisexuel',
+    'demisexuelle',
+    'grisexuel',
+    'grisexuelle',
     // Termes aromantiques
-    'aromantique', 'aro', 'arospec', 'aromanticism', 'demiromantique',
-    'grayromantic', 'greyromantic', 'arospectrum',
+    'aromantique',
+    'aro',
+    'arospec',
+    'aromanticism',
+    'demiromantique',
+    'grayromantic',
+    'greyromantic',
+    'arospectrum',
     // Termes combinés
-    'aroace', 'acearo', 'aaro', 'aace',
+    'aroace',
+    'acearo',
+    'aaro',
+    'aace',
     // Termes communautaires
-    'lgbtqia', 'queer', 'fierté', 'identité', 'orientation'
+    'lgbtqia',
+    'queer',
+    'fierté',
+    'identité',
+    'orientation',
   ],
-  
+
   de: [
     // Asexuelle Begriffe
-    'asexuell', 'ace', 'acespec', 'asexualität', 'demisexuell',
-    'grausexuell', 'aspektrum',
+    'asexuell',
+    'ace',
+    'acespec',
+    'asexualität',
+    'demisexuell',
+    'grausexuell',
+    'aspektrum',
     // Aromantische Begriffe
-    'aromantisch', 'aro', 'arospec', 'demiromantisch',
-    'grauromantisch', 'arospektrum',
+    'aromantisch',
+    'aro',
+    'arospec',
+    'demiromantisch',
+    'grauromantisch',
+    'arospektrum',
     // Kombinierte Begriffe
-    'aroace', 'acearo', 'aaro', 'aace',
+    'aroace',
+    'acearo',
+    'aaro',
+    'aace',
     // Gemeinschaftsbegriffe
-    'lgbtqia', 'queer', 'stolz', 'identität', 'orientierung'
+    'lgbtqia',
+    'queer',
+    'stolz',
+    'identität',
+    'orientierung',
   ],
-  
+
   // Microlabels comunes en todos los idiomas
   microlabels: [
     'aceflux',
@@ -92,9 +185,9 @@ export const keywords = {
     'novoace',
     'plac',
     'placio',
-    'placioace'
+    'placioace',
   ],
-  
+
   // Hashtags multilingües
   hashtags: [
     '#ace',
@@ -140,9 +233,9 @@ export const keywords = {
     '#heteroromantique',
     '#homoromantico',
     '#birromantico',
-    '#heteroromantico'
+    '#heteroromantico',
   ],
-  
+
   // Términos de comunidad
   community: {
     symbols: [
@@ -157,7 +250,7 @@ export const keywords = {
       'bague blanche',
       'ace ring',
       'schwarzer ring',
-      'weißer ring'
+      'weißer ring',
     ],
     culture: [
       'dragon ace',
@@ -170,37 +263,37 @@ export const keywords = {
       'ace space',
       'espacio ace',
       'espace ace',
-      'ace-raum'
+      'ace-raum',
     ],
     emoji_patterns: [
-      '🖤💜🤍',  // colores bandera ace
-      '🤍💚🖤',  // colores bandera aro
-      '💜🖤',    // corazones ace
-      '💚🖤',    // corazones aro
+      '🖤💜🤍', // colores bandera ace
+      '🤍💚🖤', // colores bandera aro
+      '💜🖤', // corazones ace
+      '💚🖤', // corazones aro
       '🏳️ ace',
       '🏳️ aro',
-      '🐉 ace',  // dragón
-      '🍰 ace',  // pastel
-      '💍 ace'   // anillo
-    ]
-  }
+      '🐉 ace', // dragón
+      '🍰 ace', // pastel
+      '💍 ace', // anillo
+    ],
+  },
 };
 
 // Función helper para obtener todas las keywords en un solo Set
 export function getAllKeywords() {
   const allKeywords = new Set();
-  
+
   // Función recursiva para añadir palabras de objetos anidados
   function addKeywordsFromObject(obj) {
     for (const value of Object.values(obj)) {
       if (Array.isArray(value)) {
-        value.forEach(keyword => allKeywords.add(keyword.toLowerCase()));
+        value.forEach((keyword) => allKeywords.add(keyword.toLowerCase()));
       } else if (typeof value === 'object') {
         addKeywordsFromObject(value);
       }
     }
   }
-  
+
   addKeywordsFromObject(keywords);
   return allKeywords;
 }

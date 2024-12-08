@@ -3,8 +3,24 @@ import express from 'express';
 import { AtpAgent } from '@atproto/api';
 import config from './config.js';
 import { aceFilters } from './filters.js';
-import { Cache, Logger } from './utils.js';
+import { Logger } from './utils.js';
 import { analyze } from './analyze.js';
+import { FeedDatabase } from './db.js';
+import { LanguageDetector } from './utils.js';
+
+// Inicializar el logger
+Logger.init(config.logging);
+
+// Asegurar que cerramos el logger al salir
+process.on('SIGTERM', () => {
+  Logger.close();
+  process.exit(0);
+});
+
+process.on('SIGINT', () => {
+  Logger.close();
+  process.exit(0);
+});
 
 // Basic Auth middleware for debug endpoints
 const debugAuth = (req, res, next) => {
@@ -21,15 +37,11 @@ const debugAuth = (req, res, next) => {
   const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
   const [username, password] = decoded.split(':');
 
-  console.log('Debug Auth:', {
-    expectedUsername: process.env.DEBUG_USERNAME,
-    expectedPassword: process.env.DEBUG_PASSWORD,
-    receivedUsername: username,
-    receivedPassword: password,
-  });
-
   // Check credentials against environment variables
-  if (username === process.env.DEBUG_USERNAME && password === process.env.DEBUG_PASSWORD) {
+  if (
+    username === process.env.DEBUG_USERNAME &&
+    password === process.env.DEBUG_PASSWORD
+  ) {
     next();
   } else {
     res.setHeader('WWW-Authenticate', 'Basic');
@@ -44,12 +56,19 @@ class FeedGenerator {
       service: 'https://bsky.social',
     });
 
-    this.postCache = new Cache(config.limits.maxCacheEntries);
+    this.db = new FeedDatabase();
 
     this.setupMiddleware();
     this.setupRoutes();
     this.setupErrorHandling();
-    this.login();
+
+    // Setup periodic cleanup
+    setInterval(
+      () => {
+        this.db.cleanup(config.limits.maxPostAgeHours || 24);
+      },
+      60 * 60 * 1000
+    ); // Run every hour
   }
 
   async login() {
@@ -88,7 +107,7 @@ class FeedGenerator {
     // Main feed route
     this.app.get('/xrpc/app.bsky.feed.getFeedSkeleton', async (req, res) => {
       try {
-        const feed = await this.getFeed(req.query);
+        const feed = await this.getFeedPosts(req.query);
         res.json(feed);
       } catch (error) {
         Logger.error('Feed error', error);
@@ -106,7 +125,9 @@ class FeedGenerator {
         }
 
         // Get post details from Bluesky
-        const postView = await this.agent.api.app.bsky.feed.getPosts({ uris: [uri] });
+        const postView = await this.agent.api.app.bsky.feed.getPosts({
+          uris: [uri],
+        });
 
         if (!postView.success || postView.data.posts.length === 0) {
           return res.status(404).json({ error: 'Post not found' });
@@ -116,7 +137,8 @@ class FeedGenerator {
         const postText = post.record.text;
 
         // Analyze the post
-        const { isRelevant, matchedKeywords, relevanceScore } = analyze(postText);
+        const { isRelevant, matchedKeywords, relevanceScore } =
+          analyze(postText);
         const analysis = {
           uri: post.uri,
           text: postText,
@@ -126,8 +148,6 @@ class FeedGenerator {
             isRelevant,
             isAppropriate: aceFilters.isAppropriate(postText),
             relevanceScore,
-            cached: this.postCache.get(uri) !== null,
-            cacheValue: this.postCache.get(uri),
             matchedKeywords,
           },
         };
@@ -151,92 +171,60 @@ class FeedGenerator {
     // Stats (protected)
     this.app.get('/stats', debugAuth, (req, res) => {
       res.json({
-        cacheSize: this.postCache.size(),
-        cacheHits: this.postCache.hits,
-        cacheMisses: this.postCache.misses,
+        cacheSize: this.db.getPostCount(),
+        cacheHits: 0,
+        cacheMisses: 0,
       });
     });
   }
 
   setupErrorHandling() {
-    this.app.use((err, req, res, next) => {
-      Logger.error('Unhandled error', err);
-      res.status(500).json({ error: 'Internal server error' });
+    // Error handler
+    this.app.use((err, req, res, _next) => {
+      Logger.error('Server error', err);
+      res.status(500).json({ error: 'Internal Server Error' });
     });
   }
 
-  async getFeed(params) {
-    try {
-      const { limit = 50, cursor } = params;
+  async getFeedPosts(params) {
+    const limit = Math.min(params.limit ?? 20, 100);
+    const posts = await this.db.getPosts(limit, params.cursor);
 
-      // Get recent posts from the timeline
-      const timelineResponse = await this.agent.api.app.bsky.feed.getTimeline({
-        limit: limit * 2, // Get more posts to account for filtering
-        cursor,
-      });
+    return {
+      cursor:
+        posts.length > 0
+          ? posts[posts.length - 1].timestamp.toString()
+          : undefined,
+      feed: posts.map((post) => ({
+        post: post.uri,
+        replyParent: undefined,
+        replyRoot: undefined,
+      })),
+    };
+  }
 
-      if (!timelineResponse.success) {
-        throw new Error('Failed to fetch timeline');
-      }
+  async getFeedPost(uri) {
+    return await this.db.getPost(uri);
+  }
 
-      const posts = timelineResponse.data.feed;
+  async processPost(uri, cid, author, text, timestamp) {
+    const analysisResult = analyze(text);
+    if (!analysisResult.isRelevant) return false;
 
-      // Filter and process posts
-      const filteredPosts = posts.filter((post) => {
-        // Check cache first
-        const cachedResult = this.postCache.get(post.post.uri);
-        if (cachedResult !== null) {
-          return cachedResult;
-        }
+    if (!aceFilters.isAppropriate(text)) return false;
 
-        const postText = post.post.record.text;
+    const post = {
+      uri,
+      cid,
+      author,
+      text,
+      timestamp,
+      relevanceScore: analysisResult.relevanceScore,
+      matchedKeywords: analysisResult.matchedKeywords,
+      language: LanguageDetector.detect(text),
+    };
 
-        // Apply ace/aro content filter
-        const isRelevant = aceFilters.isAceAroContent(postText);
-
-        // Check if content is appropriate
-        const isAppropriate = aceFilters.isAppropriate(postText);
-
-        // Calculate relevance score
-        const relevanceScore = aceFilters.getRelevanceScore(postText);
-
-        // Cache the result
-        const shouldInclude =
-          isRelevant && isAppropriate && relevanceScore >= config.filtering.minConfidenceScore;
-        this.postCache.set(post.post.uri, shouldInclude);
-
-        return shouldInclude;
-      });
-
-      // Sort by relevance score and remove duplicates
-      const uniquePosts = new Map();
-      const sortedPosts = filteredPosts
-        .map((post) => ({
-          post,
-          score: aceFilters.getRelevanceScore(post.post.record.text),
-        }))
-        .sort((a, b) => b.score - a.score)
-        .filter((item) => {
-          // Si ya existe un post con el mismo URI, no lo incluimos
-          if (uniquePosts.has(item.post.post.uri)) {
-            return false;
-          }
-          uniquePosts.set(item.post.post.uri, true);
-          return true;
-        })
-        .map((item) => item.post)
-        .slice(0, limit);
-
-      return {
-        cursor: sortedPosts.length > 0 ? sortedPosts[sortedPosts.length - 1].post.cursor : null,
-        feed: sortedPosts.map((post) => ({
-          post: post.post.uri,
-        })),
-      };
-    } catch (error) {
-      Logger.error('Error in getFeed', error);
-      throw error;
-    }
+    return await this.db.addPost(post);
   }
 
   start() {
