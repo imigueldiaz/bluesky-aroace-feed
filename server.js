@@ -21,12 +21,7 @@ const debugAuth = (req, res, next) => {
   const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
   const [username, password] = decoded.split(':');
 
-  console.log('Debug Auth:', {
-    expectedUsername: process.env.DEBUG_USERNAME,
-    expectedPassword: process.env.DEBUG_PASSWORD,
-    receivedUsername: username,
-    receivedPassword: password,
-  });
+  console.log('Debug Auth: Authentication attempt received');
 
   // Check credentials against environment variables
   if (username === process.env.DEBUG_USERNAME && password === process.env.DEBUG_PASSWORD) {
