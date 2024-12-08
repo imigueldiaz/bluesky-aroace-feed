@@ -11,7 +11,7 @@ describe('analyze', () => {
       expect(isRelevant).toBe(true);
     });
 
-    it('SHOULD get matched keywords AND calculate relevance score', () => {
+    it('SHOULD get matched keywords', () => {
       const { matchedKeywords } = analyze(relevantText);
       expect(matchedKeywords).toEqual(expect.arrayContaining(['aroace', 'acespec', 'aromantic']));
     });
