@@ -1,6 +1,6 @@
 {
   "name": "bluesky-aroace-feed",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Multilingual Bluesky feed generator for ace/aro community content with smart filtering and language support",
   "main": "server.js",
   "type": "module",
