@@ -1,5 +1,5 @@
-import keywords from './keywords';
-import { LanguageDetector } from './utils';
+import keywords from './keywords.js';
+import { LanguageDetector } from './utils.js';
 import { hasGamingContext } from './filter-patterns.js';
 
 const SPECIAL_CHARS_PATTERN = /[.*+?^${}()|[\]\\]/g;

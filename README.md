@@ -62,6 +62,7 @@ cp .env.example .env
 ## 🔧 Configuration
 
 1. Create a `.env` file with your Bluesky credentials:
+
 ```env
 BSKY_HANDLE=your-handle.bsky.social
 BSKY_APP_PASSWORD=your-app-password
@@ -112,6 +113,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ## 🙏 Acknowledgments
 
 Special thanks to:
+
 - [Compromise](https://github.com/spencermountain/compromise) (@spencermountain) for their incredible NLP library that powers our language detection and text analysis
 - The Bluesky team for their open protocol and support
 - The aroace community for their feedback and support

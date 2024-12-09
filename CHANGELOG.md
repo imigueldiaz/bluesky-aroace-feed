@@ -5,17 +5,20 @@ All notable changes to this project will be documented in this file.
 ## [0.2.1] - 2024-12-08
 
 ### Added
+
 - Multi-language support (English, Spanish, French, German)
 - Advanced NLP-based language detection using Compromise
 - Trigger warnings in test files and documentation
 - New badges in README for TypeScript, Vitest, AT Protocol and Bluesky
 
 ### Fixed
+
 - Improved context detection for mixed gaming/identity scenarios
 - Better handling of German language detection
 - Fixed false positives in gaming context detection
 
 ### Changed
+
 - Refactored language detection to use Compromise NLP
 - Updated documentation with clearer content warnings
 - Added acknowledgments for Compromise library

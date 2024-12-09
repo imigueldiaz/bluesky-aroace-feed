@@ -1,6 +1,16 @@
+// Mock utils.js module
+vi.mock('./utils.js', () => ({
+  defaultLogger: {
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+  },
+}));
+
 import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { FeedDatabase } from './db.js';
-import { mockFs, mockDb } from './vitest.setup.js';
+import { mockFs, mockDb, mockLogger } from './vitest.setup.js';
 
 describe('FeedDatabase', () => {
   let db;

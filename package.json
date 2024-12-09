@@ -13,8 +13,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "prepare": "husky install"
+    "format:check": "prettier --check ."
   },
   "keywords": [
     "bluesky",
@@ -32,7 +31,7 @@
     "@atproto/api": "latest",
     "@atproto/lexicon": "latest",
     "@atproto/repo": "latest",
-    "@atproto/uri": "latest",
+    "@atproto/syntax": "latest",
     "better-sqlite3": "^11.7.0",
     "compromise": "^14.10.0",
     "dotenv": "^16.3.1",
@@ -41,6 +40,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^8.56.0",
+    "@types/better-sqlite3": "^7.6.12",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.1",
     "@typescript-eslint/eslint-plugin": "^8.17.0",

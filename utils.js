@@ -152,25 +152,44 @@ export class LanguageDetector {
 
 // Clase para gestionar logs
 export class Logger {
-  constructor(logDir = './logs') {
+  static init(logDir = './logs') {
     this.logDir = logDir;
-    this.createLogDirectory();
+    Logger.createLogDirectory();
   }
 
-  createLogDirectory() {
+  static createLogDirectory() {
     if (!fs.existsSync(this.logDir)) {
       fs.mkdirSync(this.logDir, { recursive: true });
     }
   }
 
-  getLogPath() {
-    const date = new Date().toISOString().split('T')[0];
-    return path.join(this.logDir, `${date}.log`);
+  static formatMessage(level, message) {
+    const timestamp = new Date().toISOString();
+    return `[${timestamp}] ${level}: ${message}\n`;
   }
 
-  log(message) {
-    const timestamp = new Date().toISOString();
-    const logMessage = `${timestamp} - ${message}\n`;
-    fs.appendFileSync(this.getLogPath(), logMessage);
+  static log(level, message) {
+    const formattedMessage = Logger.formatMessage(level, message);
+    const logFile = path.join(this.logDir, 'app.log');
+    fs.appendFileSync(logFile, formattedMessage);
+  }
+
+  static info(message) {
+    Logger.log('INFO', message);
+  }
+
+  static error(message) {
+    Logger.log('ERROR', message);
+  }
+
+  static warn(message) {
+    Logger.log('WARN', message);
+  }
+
+  static debug(message) {
+    Logger.log('DEBUG', message);
   }
 }
+
+// Create a default instance for use throughout the application
+export const defaultLogger = new Logger();

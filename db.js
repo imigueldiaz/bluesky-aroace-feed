@@ -1,12 +1,11 @@
 import Database from 'better-sqlite3';
-import { Logger } from './utils.js';
+import { defaultLogger } from './utils.js';
 
 export class FeedDatabase {
   constructor(dbPath = 'feed.db') {
     this.db = new Database(dbPath);
     this.setupDatabase();
-    this.logger = new Logger();
-    this.logger.info('Database initialized');
+    defaultLogger.info('Database initialized');
   }
 
   setupDatabase() {
@@ -51,7 +50,7 @@ export class FeedDatabase {
       });
       return true;
     } catch (error) {
-      this.logger.error('Error adding post to database', error);
+      defaultLogger.error('Error adding post to database', error);
       return false;
     }
   }
@@ -84,7 +83,7 @@ export class FeedDatabase {
         matchedKeywords: JSON.parse(post.matched_keywords),
       }));
     } catch (error) {
-      this.logger.error('Error getting posts from database', error);
+      defaultLogger.error('Error getting posts from database', error);
       return [];
     }
   }
@@ -98,7 +97,7 @@ export class FeedDatabase {
       }
       return post;
     } catch (error) {
-      this.logger.error('Error getting post from database', error);
+      defaultLogger.error('Error getting post from database', error);
       return null;
     }
   }
@@ -108,9 +107,9 @@ export class FeedDatabase {
     try {
       const stmt = this.db.prepare('DELETE FROM posts WHERE timestamp < ?');
       const result = stmt.run(cutoffTime);
-      this.logger.info(`Cleaned up ${result.changes} old posts`);
+      defaultLogger.info(`Cleaned up ${result.changes} old posts`);
     } catch (error) {
-      this.logger.error('Error cleaning up old posts', error);
+      defaultLogger.error('Error cleaning up old posts', error);
     }
   }
 

@@ -9,7 +9,7 @@ import { FeedDatabase } from './db.js';
 import { LanguageDetector } from './utils.js';
 
 // Inicializar el logger
-Logger.init(config.logging);
+Logger.init();
 
 // Asegurar que cerramos el logger al salir
 process.on('SIGTERM', () => {
@@ -36,8 +36,6 @@ const debugAuth = (req, res, next) => {
   const encoded = authHeader.split(' ')[1];
   const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
   const [username, password] = decoded.split(':');
-
-  console.log('Debug Auth: Authentication attempt received');
 
   // Check credentials against environment variables
   if (
@@ -232,7 +230,7 @@ class FeedGenerator {
   start() {
     const port = process.env.PORT || 3000;
     this.app.listen(port, () => {
-      Logger.info(`Server started on port ${port}`);
+      Logger.log(`Server started on port ${port}`);
     });
   }
 }
