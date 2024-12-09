@@ -10,7 +10,7 @@ vi.mock('./utils.js', () => ({
 
 import { describe, expect, test, beforeEach, vi } from 'vitest';
 import { FeedDatabase } from './db.js';
-import { mockFs, mockDb, mockLogger } from './vitest.setup.js';
+import { mockFs, mockDb } from './vitest.setup.js';
 
 describe('FeedDatabase', () => {
   let db;
