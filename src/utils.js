@@ -17,12 +17,12 @@ export class Cache {
 
   get(key) {
     const item = this.cache.get(key);
-    if (!item) return null;
+    if (!item) return undefined;
 
     const age = Date.now() - item.timestamp;
     if (age > this.ttl) {
       this.cache.delete(key);
-      return null;
+      return undefined;
     }
 
     return item.value;
@@ -121,14 +121,16 @@ export class LanguageDetector {
       }
 
       // English patterns
-      if (tags[i].includes('Determiner') && tags[i + 1].includes('Noun')) {
+      const currentTags = Object.values(tags[i])[0];
+      const nextTags = i + 1 < tags.length ? Object.values(tags[i + 1])[0] : [];
+      if (currentTags.includes('Determiner') && nextTags.includes('Noun')) {
         scores.en += 1;
       }
 
       // Spanish/French patterns
       if (
         ['el', 'la', 'les'].includes(terms[i].toLowerCase()) &&
-        tags[i + 1].includes('Noun')
+        nextTags.includes('Noun')
       ) {
         scores.es += 1;
         scores.fr += 1;
@@ -150,44 +152,53 @@ export class LanguageDetector {
   }
 }
 
+// Procesador morfológico
+export class MorphologyProcessor {
+  process(text) {
+    if (!text) return '';
+    const doc = nlp(text);
+    return doc.verbs().toInfinitive().out('text') || text;
+  }
+}
+
 // Clase para gestionar logs
 export class Logger {
-  static init(logDir = './logs') {
-    this.logDir = logDir;
-    Logger.createLogDirectory();
+  constructor(logFile = './logs/app.log') {
+    this.logFile = logFile;
+    this.logDir = path.dirname(logFile);
+    this.createLogDirectory();
   }
 
-  static createLogDirectory() {
+  createLogDirectory() {
     if (!fs.existsSync(this.logDir)) {
       fs.mkdirSync(this.logDir, { recursive: true });
     }
   }
 
-  static formatMessage(level, message) {
+  formatMessage(level, message) {
     const timestamp = new Date().toISOString();
-    return `[${timestamp}] ${level}: ${message}\n`;
+    return `[${timestamp}] ${level.toUpperCase()}: ${message}\n`;
   }
 
-  static log(level, message) {
-    const formattedMessage = Logger.formatMessage(level, message);
-    const logFile = path.join(this.logDir, 'app.log');
-    fs.appendFileSync(logFile, formattedMessage);
+  log(level, message) {
+    const formattedMessage = this.formatMessage(level, message);
+    fs.appendFileSync(this.logFile, formattedMessage);
   }
 
-  static info(message) {
-    Logger.log('INFO', message);
+  info(message) {
+    this.log('info', message);
   }
 
-  static error(message) {
-    Logger.log('ERROR', message);
+  error(message) {
+    this.log('error', message);
   }
 
-  static warn(message) {
-    Logger.log('WARN', message);
+  warn(message) {
+    this.log('warn', message);
   }
 
-  static debug(message) {
-    Logger.log('DEBUG', message);
+  debug(message) {
+    this.log('debug', message);
   }
 }
 

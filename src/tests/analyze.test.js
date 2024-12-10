@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'vitest';
-import { analyze } from './analyze.js';
+import { analyze } from '../analyze.js';
 
 describe('analyze', () => {
   describe('WHEN the text is relevant', () => {

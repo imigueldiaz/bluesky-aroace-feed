@@ -77,7 +77,6 @@ web_modules/
 .env.development.local
 .env.test.local
 .env.production.local
-.env.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -144,8 +143,6 @@ build/
 
 # Environment
 .env
-.env.local
-.env.*.local
 
 # Editor
 .vscode/
@@ -167,3 +164,24 @@ coverage/
 
 # Vitest
 html/
+
+# IDE - VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Local env files
+.env.local
+.env.*.local
+
+# Temp files
+*.swp
+*.swo
+*~
+
+# SQLite databases
+*.sqlite
+*.sqlite3
+*.db

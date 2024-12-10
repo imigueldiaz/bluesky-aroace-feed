@@ -31,8 +31,8 @@ const mockDb = {
 
 // Mock path
 const mockPath = {
+  dirname: vi.fn((p) => p.split('/').slice(0, -1).join('/')),
   join: vi.fn((...args) => args.join('/')),
-  dirname: vi.fn((path) => path.split('/').slice(0, -1).join('/')),
 };
 
 // Mock Logger
@@ -132,10 +132,15 @@ vi.mock('better-sqlite3', () => ({
 }));
 
 // Mock path module
-vi.mock('path', () => mockPath);
+vi.mock('path', () => ({
+  __esModule: true,
+  default: mockPath,
+  dirname: mockPath.dirname,
+  join: mockPath.join,
+}));
 
 // Mock utils.js
-vi.mock('./utils.js', () => ({
+vi.mock('src/utils.js', () => ({
   Logger: MockLogger,
   LanguageDetector: {
     detect: mockLanguageDetector.detect,
@@ -157,4 +162,4 @@ vi.mock('vitest', async (importOriginal) => {
 });
 
 // Exportar los mocks para uso en tests
-export { mockFs, mockDb, mockLogger };
+export { mockFs, mockDb, mockLogger, mockPath };

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] - 2024-12-10
+
+### Changed
+
+- Restructured project to use src/ directory
+- Improved code organization and modularity
+- Updated Logger implementation to use instance-based approach
+- Enhanced test coverage with proper mocking
+
+### Fixed
+
+- Fixed module import paths
+- Resolved Logger initialization issues
+- Corrected Cache behavior for undefined values
+
 ## [0.2.1] - 2024-12-08
 
 ### Added
@@ -52,7 +67,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Refactored methods for iterating over keywords into a single analyze module (Thanks to [@Dorwinrin](https://github.com/Dorwinrin))
+- Refactored methods for iterating over keywords into a single analyze module
+  (Thanks to [@Dorwinrin](https://github.com/Dorwinrin))
 
 ## [0.1.0] - 2024-12-07
 
@@ -69,7 +85,8 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
-- Updated documentation to reflect Node.js implementation (previously described as Python)
+- Updated documentation to reflect Node.js implementation
+  (previously described as Python)
 
 ### Fixed
 

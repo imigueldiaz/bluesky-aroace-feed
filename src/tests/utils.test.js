@@ -4,8 +4,8 @@ import {
   LanguageDetector,
   MorphologyProcessor,
   Logger,
-} from './utils.js';
-import { mockFs } from './vitest.setup.js';
+} from '../utils.js';
+import { mockFs, mockPath } from '../../vitest.setup.js';
 
 describe('Cache', () => {
   test('should store and retrieve values', () => {
@@ -59,6 +59,9 @@ describe('Logger', () => {
     mockFs.existsSync.mockImplementation(() => false);
     mockFs.mkdirSync.mockImplementation(() => {});
     mockFs.appendFileSync.mockImplementation(() => {});
+    mockPath.dirname.mockImplementation((p) =>
+      p.split('/').slice(0, -1).join('/')
+    );
   });
 
   test('should create log directory if it does not exist', () => {

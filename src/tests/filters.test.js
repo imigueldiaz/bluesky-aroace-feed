@@ -8,7 +8,7 @@
  */
 
 import { describe, test, expect } from 'vitest';
-import { aceFilters } from './filters.js';
+import { aceFilters } from '../filters.js';
 
 describe('aceFilters', () => {
   describe('isAppropriate', () => {

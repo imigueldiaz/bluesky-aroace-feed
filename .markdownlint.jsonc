@@ -1,0 +1,6 @@
+{
+  // Disable duplicate headings rule as it's necessary for CHANGELOG.md where each version
+  // uses the same section headers (Added, Changed, Fixed, etc.)
+  "MD024": false,
+  "no-duplicate-heading": false
+}

@@ -486,10 +486,3 @@ export const filterRelevantPosts = (posts) => {
     return aceFilters.isAppropriate(post.text, post);
   });
 };
-
-function findTermsInWindow(words, startIndex, windowSize, terms) {
-  const start = Math.max(0, startIndex - windowSize);
-  const end = Math.min(words.length, startIndex + windowSize + 1);
-  const window = words.slice(start, end);
-  return window.some((word) => terms.includes(word.toLowerCase()));
-}

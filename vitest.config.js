@@ -6,7 +6,7 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov', 'cobertura'],
       reportsDirectory: './coverage',
-      exclude: ['node_modules/**', 'dist/**', '**/*.test.js', '**/*.config.js'],
+      exclude: ['node_modules/**', 'dist/**', '**/*.config.js'],
       all: true,
       clean: true,
       thresholds: {
@@ -16,7 +16,7 @@ export default defineConfig({
     },
     environment: 'node',
     globals: true,
-    include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    include: ['src/tests/**/*.test.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     setupFiles: ['./vitest.setup.js'],
     deps: {
       interopDefault: true,

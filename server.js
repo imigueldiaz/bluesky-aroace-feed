@@ -1,24 +1,24 @@
 import 'dotenv/config';
 import express from 'express';
 import { AtpAgent } from '@atproto/api';
-import config from './config.js';
-import { aceFilters } from './filters.js';
-import { Logger } from './utils.js';
-import { analyze } from './analyze.js';
-import { FeedDatabase } from './db.js';
-import { LanguageDetector } from './utils.js';
+import config from './src/config.js';
+import { aceFilters } from './src/filters.js';
+import { Logger } from './src/utils.js';
+import { analyze } from './src/analyze.js';
+import { FeedDatabase } from './src/db.js';
+import { LanguageDetector } from './src/utils.js';
 
 // Inicializar el logger
-Logger.init();
+const logger = new Logger();
 
 // Asegurar que cerramos el logger al salir
 process.on('SIGTERM', () => {
-  Logger.close();
+  logger.close();
   process.exit(0);
 });
 
 process.on('SIGINT', () => {
-  Logger.close();
+  logger.close();
   process.exit(0);
 });
 
@@ -77,9 +77,9 @@ class FeedGenerator {
         identifier: process.env.BLUESKY_IDENTIFIER,
         password: process.env.BLUESKY_PASSWORD,
       });
-      Logger.info('Successfully logged in to Bluesky');
+      logger.info('Successfully logged in to Bluesky');
     } catch (error) {
-      Logger.error('Failed to login to Bluesky', error);
+      logger.error('Failed to login to Bluesky', error);
       throw error;
     }
   }
@@ -92,7 +92,7 @@ class FeedGenerator {
       const start = Date.now();
       res.on('finish', () => {
         const duration = Date.now() - start;
-        Logger.info('Request processed', {
+        logger.info('Request processed', {
           method: req.method,
           url: req.url,
           duration,
@@ -110,7 +110,7 @@ class FeedGenerator {
         const feed = await this.getFeedPosts(req.query);
         res.json(feed);
       } catch (error) {
-        Logger.error('Feed error', error);
+        logger.error('Feed error', error);
         res.status(500).json({ error: 'Error getting feed' });
       }
     });
@@ -154,7 +154,7 @@ class FeedGenerator {
 
         res.json(analysis);
       } catch (error) {
-        Logger.error('Debug error', error);
+        logger.error('Debug error', error);
         res.status(500).json({ error: 'Error analyzing post' });
       }
     });
@@ -181,7 +181,7 @@ class FeedGenerator {
   setupErrorHandling() {
     // Error handler
     this.app.use((err, req, res, _next) => {
-      Logger.error('Server error', err);
+      logger.error('Server error', err);
       res.status(500).json({ error: 'Internal Server Error' });
     });
   }
@@ -230,7 +230,7 @@ class FeedGenerator {
   start() {
     const port = process.env.PORT || 3000;
     this.app.listen(port, () => {
-      Logger.log(`Server started on port ${port}`);
+      logger.log(`Server started on port ${port}`);
     });
   }
 }
